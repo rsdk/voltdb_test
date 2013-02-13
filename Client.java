@@ -13,34 +13,22 @@ public class Client {
 		// *** Load the DB ***
 		
 		//Load Countries from file
-		FileReader fr = new FileReader("country_names_and_code_elements_txt");
+		FileReader fr = new FileReader("country_names_and_code_elements_txt.txt");
 		BufferedReader br = new BufferedReader(fr);
 			
 		String zeile = "";
-		String[] parts = new String[2];
+		String[] parts = new String[4];
 
 		while( (zeile = br.readLine()) != null )
 		{
 			parts = zeile.split(";");
 			myApp.callProcedure("Insert_country", parts[1],parts[0],"");
+			myApp.callProcedure("Insert_country_specific", parts[1], parts[2],parts[3]);
 		}
 		br.close();
 		fr.close();
 		//Load Card with random cards
-					/*
-			CREATE TABLE card (
-				card_num BIGINT NOT NULL,
-				daily_limit DECIMAL,
-				monthly_limit DECIMAL,
-				blocked TINYINT,
-				distance_per_hour_max SMALLINT,
-				customer_name VARCHAR(64),
-				PRIMARY KEY (card_num)
-			);
-			*/
-		//myApp.callProcedure("Insert_card", "long_rnd", "long_daily", "long_monthly", "blocked == 1 byte", "short entfernung in lat/long", "String rnd_name");
-		//myApp.callProcedure("Insert_card", 9998887776665554L, 800 ,18000, 1, 5, "Peter Gryffin");
-		
+
 		//String Array aus vornamendatei laden
 		FileReader frfn = new FileReader("baby-names.csv");
 		BufferedReader brfn = new BufferedReader(frfn);
@@ -54,7 +42,7 @@ public class Client {
 		}
 		brfn.close();
 		frfn.close();
-		//String Array aus nachamendatei laden
+		//String Array aus nachnamendatei laden
 		FileReader frln = new FileReader("surnames.csv");
 		BufferedReader brln = new BufferedReader(frln);
 			
@@ -67,8 +55,6 @@ public class Client {
 		}
 		brln.close();
 		frln.close();
-		
-		
 		
 		
 		int numberOfCards = 10000;
@@ -85,6 +71,51 @@ public class Client {
 			number_rndln = (int) (Math.random()*lastnames.size());
 			myApp.callProcedure("Insert_card", cardnumber++, daily[number_rnd10], monthly[number_rnd10], 1, 5, firstnames.get(number_rndfn)+" "+lastnames.get(number_rndln));
 		}
+		
+		
+		System.out.printf("Datenbank vorbereitet \n\n");
+		
+		// Transactions
+		/*
+		 * 
+		 * CREATE TABLE transfer (
+			transfer_num BIGINT NOT NULL,
+			transfer_time TIMESTAMP,
+			card_num BIGINT NOT NULL,
+			amount DECIMAL NOT NULL,
+			purpose VARCHAR(64),
+			latitude FLOAT,
+			longitude FLOAT,
+			country_code VARCHAR(2),
+			PRIMARY KEY (transfer_num)
+			);
+		 * 
+		 * 
+		 */
+		//neue Daten
+		long number_rndcard = 0;
+		long amount = 0;
+		String country_code = "DE";
+		double lat_neu = 48.4;
+		double long_neu = 13.9;
+		amount = (long) (Math.random() * 1000 + 40);		
+		
+		
+		number_rndcard = (long) (Math.random() * numberOfCards + cardnumber); //zufallszahl für card
+
+		//hole alte daten
+		final ClientResponse response_transfer = myApp.callProcedure("Select_transfer", number_rndcard);
+		double lat_alt = 48.2;
+		double long_alt = 15.7;
+		
+		//Berechne Entfernung
+		double delta_lat = Math.abs(lat_neu - lat_alt);
+		double delta_long = Math.abs(long_neu - long_alt);
+		double distance = Math.sqrt( Math.pow(delta_lat, 2) + Math.pow(delta_long, 2) );
+		
+		//check if last transaction is near
+		
+		
 		
 		// *** Retrieve data ***
 		final ClientResponse response = myApp.callProcedure("Select_all_countries");
