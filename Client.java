@@ -105,6 +105,25 @@ public class Client {
 
 		//hole alte daten
 		final ClientResponse response_transfer = myApp.callProcedure("Select_transfer", number_rndcard);
+		if (response_transfer.getStatus() != ClientResponse.SUCCESS) {
+			System.err.println(response_transfer.getStatusString());
+			System.exit(-1);
+		}
+		
+		final VoltTable results_transfer[] = response_transfer.getResults();
+		if (results_transfer.length == 0) {
+			System.out.printf("keine vorherige transaction zu dieser karte\n");
+			//System.exit(-1);
+		}
+		else {
+			//TODO schleife
+			VoltTable resultTable_transfer = results_transfer[0];
+			VoltTableRow row_transfer = resultTable_transfer.fetchRow(0);
+			System.out.printf("%s, %s, %s \n", row_transfer.getString("latitude"),
+												row_transfer.getString("longitude"),
+												row_transfer.getString("transfer_time"));
+			//prüfe
+		}
 		double lat_alt = 48.2;
 		double long_alt = 15.7;
 		

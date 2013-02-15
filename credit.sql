@@ -5,8 +5,8 @@ CREATE TABLE transfer (
     amount DECIMAL NOT NULL,
     purpose VARCHAR(64),
     latitude FLOAT,
-    longtitude FLOAT,
-    country_CODE VARCHAR(2),
+    longitude FLOAT,
+    country_code VARCHAR(2),
     PRIMARY KEY (transfer_num)
 );
 CREATE TABLE card (
@@ -46,6 +46,8 @@ PARTITION TABLE country_specific ON COLUMN country_code;
 PARTITION TABLE countries ON COLUMN country_code;
 
 CREATE PROCEDURE FROM CLASS Insert_country;
+CREATE PROCEDURE FROM CLASS Insert_country_specific;
+CREATE PROCEDURE FROM CLASS Insert_country_specific_per_card;
 CREATE PROCEDURE FROM CLASS Insert_card;
 CREATE PROCEDURE FROM CLASS Select_all_countries;
 

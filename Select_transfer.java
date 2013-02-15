@@ -5,7 +5,7 @@ public class Select_transfer extends VoltProcedure {
 	//1 day in microseconds: 86400 seconds
 	long microsTime = System.currentTimeMillis() * 1000L;
 	public final SQLStmt sql = new SQLStmt(
-		"SELECT transfer_time, amount, latitude, longitude, country_code FROM transfer WHERE card_num = ? AND WHERE transfer_time > "+ ((String)( microsTime - 2628000L )) +" ORDER BY transfer_time DESC;"
+		"SELECT transfer_time, amount, latitude, longitude, country_code FROM transfer WHERE card_num = ? AND WHERE transfer_time > "+ ( microsTime - 2628000L ) +" ORDER BY transfer_time DESC;"
 		);
 		
 	public VoltTable[] run( long card_num
