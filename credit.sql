@@ -1,5 +1,4 @@
 CREATE TABLE transfer (
-    transfer_num BIGINT NOT NULL,
     transfer_time TIMESTAMP,
     card_num BIGINT NOT NULL,
     amount DECIMAL NOT NULL,
@@ -7,7 +6,7 @@ CREATE TABLE transfer (
     latitude FLOAT,
     longitude FLOAT,
     country_code VARCHAR(2),
-    PRIMARY KEY (transfer_num)
+    PRIMARY KEY (card_num, transfer_time)
 );
 CREATE TABLE card (
     card_num BIGINT NOT NULL,
@@ -50,6 +49,8 @@ CREATE PROCEDURE FROM CLASS Insert_country_specific;
 CREATE PROCEDURE FROM CLASS Insert_country_specific_per_card;
 CREATE PROCEDURE FROM CLASS Insert_card;
 CREATE PROCEDURE FROM CLASS Select_all_countries;
+CREATE PROCEDURE FROM CLASS new_transfer;
 
 
 PARTITION PROCEDURE Insert_country ON TABLE countries COLUMN country_code;
+PARTITION PROCEDURE new_transfer ON TABLE transfer COLUMN card_num;
