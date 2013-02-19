@@ -49,7 +49,12 @@ CREATE PROCEDURE FROM CLASS Insert_country_specific;
 CREATE PROCEDURE FROM CLASS Insert_country_specific_per_card;
 CREATE PROCEDURE FROM CLASS Insert_card;
 CREATE PROCEDURE FROM CLASS Select_all_countries;
+<<<<<<< HEAD
 CREATE PROCEDURE FROM CLASS new_transfer;
+=======
+CREATE PROCEDURE FROM CLASS Select_transfer;
+CREATE PROCEDURE FROM CLASS Insert_transfer;
+>>>>>>> 12c5420c3d721055ec4b53dab82ae861e813b68d
 
 
 PARTITION PROCEDURE Insert_country ON TABLE countries COLUMN country_code;
