@@ -44,21 +44,27 @@ public class new_transfer extends VoltProcedure {
 			// *** check if transfer ist valid ***
 			
 			
-			voltQueueSQL( select_last_sql, card_num); // last transfer
-			VoltTable[] queryresults_lasttransfer = voltExecuteSQL();
+			voltQueueSQL( select_card_sql, card_num); // is the card-number valid
+			VoltTable[] queryresults_card = voltExecuteSQL();
+			
 			// If there is no matching record, rollback  
-			if (queryresults_lasttransfer[0].getRowCount() == 0 ) throw new VoltAbortException();
+			if (queryresults_card[0].getRowCount() == 0 ) throw new VoltAbortException();
 						
-			voltQueueSQL( select_card_sql, card_num);
-			voltQueueSQL( select_country_sql, country_code);
-			voltQueueSQL( select_country_spec_sql, card_num, country_code);
-			voltQueueSQL( select_amount_d_sql, card_num);
-			voltQueueSQL( select_amount_d_country_sql, card_num, country_code);
-			voltQueueSQL( select_amount_m_sql, card_num);
+			voltQueueSQL( select_last_sql, card_num); // queue 0
+			voltQueueSQL( select_country_sql, country_code); //queue 1
+			voltQueueSQL( select_country_spec_sql, card_num, country_code); //queue 2
+			voltQueueSQL( select_amount_d_sql, card_num); // 3
+			voltQueueSQL( select_amount_d_country_sql, card_num, country_code); // 4
+			voltQueueSQL( select_amount_m_sql, card_num); // 5
 			
 			VoltTable[] queryresults = voltExecuteSQL();
 			
-			
+			//checks
+			//is there data for this country? if no then don't do anything OR if this country is not allowed then do nothing OR if daily limit for this country
+			if (queryresults[1].getRowCount() == 0 || queryresults[1].fetchRow(0).getLong(0) != 1 || queryresults[1].fetchRow(0).getLong(1) < amount + queryresults[4].fetchRow(0).getDouble(0) ) {
+				throw new VoltAbortException();
+			}
+				
 			
 			
 			
