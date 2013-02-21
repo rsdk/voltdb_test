@@ -31,7 +31,7 @@ CREATE TABLE country_specific (
     PRIMARY KEY (country_code)
 );
 CREATE TABLE countries (
-    country_code VARCHAR(2) NOT NULL,
+    country_code VARCHAR(2) NOT NULL UNIQUE,
     country_name VARCHAR(64) NOT NULL,
     notes VARCHAR(200)
 );
@@ -49,13 +49,8 @@ CREATE PROCEDURE FROM CLASS Insert_country_specific;
 CREATE PROCEDURE FROM CLASS Insert_country_specific_per_card;
 CREATE PROCEDURE FROM CLASS Insert_card;
 CREATE PROCEDURE FROM CLASS Select_all_countries;
-<<<<<<< HEAD
-CREATE PROCEDURE FROM CLASS new_transfer;
-=======
-CREATE PROCEDURE FROM CLASS Select_transfer;
-CREATE PROCEDURE FROM CLASS Insert_transfer;
->>>>>>> 12c5420c3d721055ec4b53dab82ae861e813b68d
 
+CREATE PROCEDURE FROM CLASS new_transfer;
 
 PARTITION PROCEDURE Insert_country ON TABLE countries COLUMN country_code;
 PARTITION PROCEDURE new_transfer ON TABLE transfer COLUMN card_num;

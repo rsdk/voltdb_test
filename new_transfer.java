@@ -1,4 +1,5 @@
 import org.voltdb.*;
+import org.voltdb.types.TimestampType;
 
 
 /*
@@ -12,20 +13,22 @@ import org.voltdb.*;
  */
  
 public class new_transfer extends VoltProcedure {
-	//1 month in microseconds: 2.628×10^6 seconds = 2628000 seconds
-	//1 day in microseconds: 86400 seconds
+	//1 month in microseconds: 2.628×10^6 seconds = 2628000000000 useconds
+	//1 day in microseconds: 86400000000 useconds
 	TimestampType current = new TimestampType();
+	TimestampType minusOneD = new TimestampType(current.getTime() - 86400000000L);
+	TimestampType minusOneM = new TimestampType(current.getTime()-  2628000000000L);
 	//Grunddaten
 	final String select_card= "SELECT blocked, daily_limit, monthly_limit, distance_per_hour_max FROM card WHERE card_num = ?;";
 	final String select_country= "SELECT disallowed, daily_limit FROM country_specific WHERE country_code = ?;";
-	final String select_country_spec= "SELECT disallowed, daily_limit FROM country_specific_per_card WHERE card_num = ? AND WHERE country_code = ?;";
+	final String select_country_spec= "SELECT disallowed, daily_limit FROM country_specific_per_card WHERE card_num = ? AND country_code = ?;";
 	//Daten von den Transfers
-	final String select_last = "SELECT TOP 1 transfer_time, latitude, longitude FROM transfer WHERE card_num = ? ORDER BY transfer_time DESC;";
-	final String select_amount_d_country = "SELECT sum(amount) FROM transfer WHERE card_num = ? AND WHERE country_code = ? AND WHERE transfer_time > "+ ( current.getLong() - 86400L );
-	final String select_amount_d = "SELECT sum(amount) FROM transfer WHERE card_num = ? AND WHERE transfer_time > "+ ( current.getLong() - 86400L );
-	final String select_amount_m = "SELECT sum(amount) FROM transfer WHERE card_num = ? AND WHERE transfer_time > "+ ( current.getLong() - 2628000L );
+	final String select_last = "SELECT TOP 1 transfer_time, latitude, longitude FROM transfer WHERE card_num = ? ORDER BY transfer_time, card_num DESC;";
+	final String select_amount_d_country = "SELECT SUM(amount) FROM transfer WHERE card_num = ? AND country_code = ? AND transfer_time > '"+ minusOneD +"';";
+	final String select_amount_d = "SELECT sum(amount) FROM transfer WHERE card_num = ? AND transfer_time > '"+ minusOneD +"';";
+	final String select_amount_m = "SELECT sum(amount) FROM transfer WHERE card_num = ? AND transfer_time > '"+ minusOneM +"';";
 
-	final String insert = "INSERT INTO transfer (?,?,?,?,?,?,?,?);";
+	final String insert = "INSERT INTO transfer VALUES (?,?,?,?,?,?,?);";
 	
 	public final SQLStmt select_card_sql = new SQLStmt(select_card);
 	public final SQLStmt select_country_sql = new SQLStmt(select_country);
@@ -38,8 +41,7 @@ public class new_transfer extends VoltProcedure {
 	
 	public final SQLStmt insert_sql = new SQLStmt(insert);
 		
-	public VoltTable[] run( long card_num, long amount, float latitude, float longitude, String country_code, String purpose) throws VoltAbortException {
-			
+	public VoltTable[] run( long card_num, long amount, double latitude, double longitude, String country_code, String purpose) throws VoltAbortException {
 			
 			// *** check if transfer ist valid ***
 			voltQueueSQL( select_card_sql, card_num); // is the card-number valid
@@ -56,7 +58,6 @@ public class new_transfer extends VoltProcedure {
 			voltQueueSQL( select_amount_m_sql, card_num); // 5
 			
 			VoltTable[] queryresults = voltExecuteSQL();
-			
 
 			//checks
 			//is there a transfer
@@ -80,28 +81,20 @@ public class new_transfer extends VoltProcedure {
 				
 				double delta_time = ( current.getTime() - queryresults[0].fetchRow(0).getTimestampAsLong(0) ) / 1000*1000*60*60;
 				
-				if ( distance / delta_time > queryresults_card[0].fetchRow[0].getLong(3) ) {
+				if ( distance / delta_time > queryresults_card[0].fetchRow(0).getLong(3) ) {
 					throw new VoltAbortException();
-				}
-				
+				} 
 				
 				//specific country check
-				
-				
-			} else {
+			}	
+			// Insert the new Transaction
+			voltQueueSQL( insert_sql, card_num);
 			
-				// Insert the new Transaction
-				voltQueueSQL( insert_sql, card_num);
-				
-				return voltExecuteSQL();
-			
-			}
-		
-			
+			return voltExecuteSQL();	
 		}
 }
 
-						
+					
 /*
 CREATE TABLE transfer (
     transfer_time TIMESTAMP,
