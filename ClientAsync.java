@@ -3,7 +3,7 @@ import org.voltdb.client.*;
 import java.io.*;
 import java.util.*;
 
-public class Client {
+public class ClientAsync {
 	public static void main(String[] args) throws Exception {
 		// *** Instantiate Client and connect to Database ***
 		org.voltdb.client.Client myApp;
@@ -57,7 +57,7 @@ public class Client {
 		frln.close();
 		
 		
-		int numberOfCards = 10000000; // 10 Mio dauert ca. eine Stunde
+		int numberOfCards = 1000000; // 10 Mio dauert ca. eine Stunde
 		long cardnumber_start = 1111222233330000L;
 		long cardnumber = cardnumber_start;
 		int[] daily = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 100000, 1000000};
@@ -107,26 +107,27 @@ public class Client {
 		
 		// INSERT
 		
-		final ClientResponse response = myApp.callProcedure("new_transfer", 
-															cardnumber_start+1,  /*card_number*/
-															10,      /*amount*/
-															48.2,      /*/lat*/
-															13.0,      /*long*/
-															"DE",      /*country_code*/
-															"TEST"     /*purpose*/
-															);
+		//final ClientResponse response = myApp.callProcedure("new_transfer", 
+		//													cardnumber_start+1,  /*card_number*/
+		//													10,      /*amount*/
+		//													48.2,      /*/lat*/
+		//													13.0,      /*long*/
+		//													"DE",      /*country_code*/
+		//													"TEST"     /*purpose*/
+		//	
+		//												);
 		long rnd_cardnumber = 0L;
-												
-		for (int k = 0; k < 2000000; k++) {
+		int number_transactions = 2000000;										
+		for (int k = 0; k < number_transactions; k++) {
 			amount = (int) (Math.random()*1000);
 			rnd_cardnumber = cardnumber_start+((int) (Math.random()*numberOfCards));
-			if ( k % 1000 == 0 ) {
-				System.out.println("Transfer-number: " + k + "   Amount: "+ amount);
+			if ( k % 100000 == 0 ) {
+				System.out.println("Transfer-number: " + k);
 			}
 			String zweck = "TEST " + k;
 			
 			try {
-			myApp.callProcedure("new_transfer", 
+			myApp.callProcedure(new NullCallback(), "new_transfer", 
 								rnd_cardnumber,  /*card_number*/
 								amount,      /*amount*/
 								48.2,      /*/lat*/

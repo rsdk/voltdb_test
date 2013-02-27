@@ -2,6 +2,8 @@ CLASSPATH="./:/usr/lib/voltdb/*"
 export CLASSPATH
 
 javac Client.java
+javac ClientAsync.java
+javac ClientAsync2.java
 javac Insert_country.java
 javac Select_all_countries.java
 javac Insert_card.java

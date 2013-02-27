@@ -1,4 +1,4 @@
 CLASSPATH="./:/usr/lib/voltdb/*"
 export CLASSPATH
 
-java ClientAsync
+java ClientAsync2

@@ -72,7 +72,7 @@ public class new_transfer extends VoltProcedure {
 				
 				//daily?  
 				if (  queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ) < 0 ) {
-					System.out.println("Daily Limit");
+					//System.out.println("Daily Limit");
 					throw new VoltAbortException();
 				}
 				
@@ -86,7 +86,7 @@ public class new_transfer extends VoltProcedure {
 				//general country check
 				//is there data for this country? if no then don't do anything OR if this country is not allowed then do nothing OR if daily limit for this country would be exceeded
 				if (queryresults[1].getRowCount() == 0 || queryresults[1].fetchRow(0).getLong(0) != 1 || queryresults[1].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[4].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount))) < 0 ) {
-					System.out.println("Country check failed");
+					//System.out.println("Daily Limit Country");
 					throw new VoltAbortException();
 				}
 				
@@ -98,7 +98,7 @@ public class new_transfer extends VoltProcedure {
 				double delta_time = ( current.getTime() - queryresults[0].fetchRow(0).getTimestampAsLong(0) ) / 1000*1000*60*60;
 				
 				if ( distance / delta_time > queryresults_card[0].fetchRow(0).getLong(3) ) {
-					System.out.println("Distance Check failed");
+					System.out.println("Distance");
 					throw new VoltAbortException();
 				} 
 				

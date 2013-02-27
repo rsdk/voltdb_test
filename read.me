@@ -11,3 +11,11 @@ Browser DB-Status: localhost:8080
 
 country-codes: ISO 3166-1 Alpha 2
 
+
+
+SQL:
+
+Die Karte mit der höchsten Transfersumme:
+
+select top 1 card_num, sum(amount) as money from transfer group by card_num order by money desc;
+
