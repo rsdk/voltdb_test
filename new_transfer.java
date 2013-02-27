@@ -1,6 +1,6 @@
 import org.voltdb.*;
 import org.voltdb.types.TimestampType;
-
+import java.math.BigDecimal;
 
 /*
  * 1. Prüfen ob der Transfer durchgeführt werden darf
@@ -64,19 +64,37 @@ public class new_transfer extends VoltProcedure {
 			if (queryresults[0].getRowCount() != 0 ) {
 				
 				//card blocked & general amount check
-				// card blocked?      daily?  monthly
-				if (queryresults_card[0].fetchRow(0).getLong(0) != 1 || queryresults_card[0].fetchRow(0).getLong(1) < amount + queryresults[3].fetchRow(0).getDouble(0) || queryresults_card[0].fetchRow(0).getLong(2) < amount + queryresults[5].fetchRow(0).getDouble(0)) {
+				// card blocked?      
+				if (queryresults_card[0].fetchRow(0).getLong(0) != 1) {
 					throw new VoltAbortException();
 				}
+				
+				//daily?  
+				if (  queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ) < 0 ) {
+					System.out.println("Limit:   " + queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).toString());
+					System.out.println("Value:   " + queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount) ).toString());
+					System.out.println("Amount:  " + amount );
+					System.out.println("Query:   " + queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).toString());
+					System.out.println("Ergebnis:" + queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ));
+					
+					throw new VoltAbortException();
+				}
+				
+				//monthly?
+				if (  queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(2).compareTo( queryresults[5].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ) < 0 ) {
+					throw new VoltAbortException();
+				}
+				
+				
 				//general country check
 				//is there data for this country? if no then don't do anything OR if this country is not allowed then do nothing OR if daily limit for this country would be exceeded
-				if (queryresults[1].getRowCount() == 0 || queryresults[1].fetchRow(0).getLong(0) != 1 || queryresults[1].fetchRow(0).getLong(1) < amount + queryresults[4].fetchRow(0).getDouble(0) ) {
+				if (queryresults[1].getRowCount() == 0 || queryresults[1].fetchRow(0).getLong(0) != 1 || queryresults[1].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[4].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount))) < 0 ) {
 					throw new VoltAbortException();
 				}
 				
 				//distance check
-				double delta_lat = Math.abs(latitude - queryresults[0].fetchRow(0).getLong(1));
-				double delta_long = Math.abs(longitude - queryresults[0].fetchRow(0).getLong(2));
+				double delta_lat = Math.abs(latitude - queryresults[0].fetchRow(0).getDouble(1));
+				double delta_long = Math.abs(longitude - queryresults[0].fetchRow(0).getDouble(2));
 				double distance = Math.sqrt( Math.pow(delta_lat, 2) + Math.pow(delta_long, 2) );
 				
 				double delta_time = ( current.getTime() - queryresults[0].fetchRow(0).getTimestampAsLong(0) ) / 1000*1000*60*60;
@@ -90,7 +108,7 @@ public class new_transfer extends VoltProcedure {
 				
 			}	
 			// Insert the new Transaction
-			voltQueueSQL( insert_sql, current, card_num, amount, purpose , latitude, longitude, country_code );
+			voltQueueSQL( insert_sql, this.getTransactionTime(), card_num, amount, purpose , latitude, longitude, country_code );
 			
 			return voltExecuteSQL();
 		}

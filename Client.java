@@ -29,7 +29,7 @@ public class Client {
 		fr.close();
 		//Load Card with random cards
 
-		//String Array aus vornamendatei laden
+		//load String Array with names from file
 		FileReader frfn = new FileReader("baby-names.csv");
 		BufferedReader brfn = new BufferedReader(frfn);
 			
@@ -42,7 +42,7 @@ public class Client {
 		}
 		brfn.close();
 		frfn.close();
-		//String Array aus nachnamendatei laden
+		//load String Array with names from file
 		FileReader frln = new FileReader("surnames.csv");
 		BufferedReader brln = new BufferedReader(frln);
 			
@@ -58,7 +58,8 @@ public class Client {
 		
 		
 		int numberOfCards = 10000;
-		long cardnumber = 1111222233330000L;
+		long cardnumber_start = 1111222233330000L;
+		long cardnumber = cardnumber_start;
 		int[] daily = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 100000, 1000000};
 		int[] monthly = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 1000000, 10000000};
 		int number_rnd10 = 0;
@@ -66,9 +67,9 @@ public class Client {
 		int number_rndln = 0;
 		
 		for (int i = 0; i < numberOfCards; i++){
-			number_rnd10 = (int) (Math.random()*10);
-			number_rndfn = (int) (Math.random()*firstnames.size());
-			number_rndln = (int) (Math.random()*lastnames.size());
+			number_rnd10 = (int) (Math.random()*10);  //random number from 0 till 9
+			number_rndfn = (int) (Math.random()*firstnames.size());  //random number for namearray
+			number_rndln = (int) (Math.random()*lastnames.size());   //random number for namearray
 			myApp.callProcedure("Insert_card", cardnumber++, daily[number_rnd10], monthly[number_rnd10], 1, 5, firstnames.get(number_rndfn)+" "+lastnames.get(number_rndln));
 		}
 		
@@ -77,7 +78,6 @@ public class Client {
 		
 		// Transactions
 		/*
-		 * 
 		 * CREATE TABLE transfer (
 			transfer_num BIGINT NOT NULL,
 			transfer_time TIMESTAMP,
@@ -89,9 +89,8 @@ public class Client {
 			country_code VARCHAR(2),
 			PRIMARY KEY (transfer_num)
 			);
-		 * 
-		 * 
 		 */
+		 
 		//neue Daten
 		long number_rndcard = 0;
 		long amount = 0;
@@ -106,14 +105,27 @@ public class Client {
 		// INSERT
 		
 		final ClientResponse response = myApp.callProcedure("new_transfer", 
-															1111222233330001L,  /*card_number*/
+															cardnumber_start+1,  /*card_number*/
 															10,      /*amount*/
 															48.2,      /*/lat*/
 															13.0,      /*long*/
 															"DE",      /*country_code*/
 															"TEST"     /*purpose*/
 															);
-		
-
+												
+		for (int k = 0; k < 100; k++) {
+			amount = (int) (Math.random()*100);
+			System.out.println("Transfer-number: " + k + "   Amount: "+ amount);
+			String zweck = "TEST " + k;
+			myApp.callProcedure("new_transfer", 
+								cardnumber_start+1,  /*card_number*/
+								amount,      /*amount*/
+								48.2,      /*/lat*/
+								13.0,      /*long*/
+								"DE",      /*country_code*/
+								zweck     /*purpose*/
+								);
 		}
+	
+	}
 }
