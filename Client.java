@@ -112,20 +112,31 @@ public class Client {
 															"DE",      /*country_code*/
 															"TEST"     /*purpose*/
 															);
+		long rnd_cardnumber = 0L;
 												
-		for (int k = 0; k < 100; k++) {
+		for (int k = 0; k < 100000000; k++) {
 			amount = (int) (Math.random()*100);
-			System.out.println("Transfer-number: " + k + "   Amount: "+ amount);
+			rnd_cardnumber = cardnumber_start+((int) (Math.random()*numberOfCards));
+			if ( k % 1000 == 0 ) {
+				System.out.println("Transfer-number: " + k + "   Amount: "+ amount);
+			}
 			String zweck = "TEST " + k;
+			
+			try {
 			myApp.callProcedure("new_transfer", 
-								cardnumber_start+1,  /*card_number*/
+								rnd_cardnumber,  /*card_number*/
 								amount,      /*amount*/
 								48.2,      /*/lat*/
 								13.0,      /*long*/
 								"DE",      /*country_code*/
 								zweck     /*purpose*/
 								);
+			} catch (Exception e) {
+				//e.printStackTrace();
+				//System.exit(-1);
+			}
 		}
+		 
 	
 	}
 }

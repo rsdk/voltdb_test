@@ -66,22 +66,19 @@ public class new_transfer extends VoltProcedure {
 				//card blocked & general amount check
 				// card blocked?      
 				if (queryresults_card[0].fetchRow(0).getLong(0) != 1) {
+					System.out.println("Card is Blocked");
 					throw new VoltAbortException();
 				}
 				
 				//daily?  
 				if (  queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ) < 0 ) {
-					System.out.println("Limit:   " + queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).toString());
-					System.out.println("Value:   " + queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount) ).toString());
-					System.out.println("Amount:  " + amount );
-					System.out.println("Query:   " + queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).toString());
-					System.out.println("Ergebnis:" + queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[3].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ));
-					
+					System.out.println("Daily Limit");
 					throw new VoltAbortException();
 				}
 				
 				//monthly?
 				if (  queryresults_card[0].fetchRow(0).getDecimalAsBigDecimal(2).compareTo( queryresults[5].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount)) ) < 0 ) {
+					System.out.println("Monthly Limit");
 					throw new VoltAbortException();
 				}
 				
@@ -89,6 +86,7 @@ public class new_transfer extends VoltProcedure {
 				//general country check
 				//is there data for this country? if no then don't do anything OR if this country is not allowed then do nothing OR if daily limit for this country would be exceeded
 				if (queryresults[1].getRowCount() == 0 || queryresults[1].fetchRow(0).getLong(0) != 1 || queryresults[1].fetchRow(0).getDecimalAsBigDecimal(1).compareTo( queryresults[4].fetchRow(0).getDecimalAsBigDecimal(0).add(new BigDecimal(amount))) < 0 ) {
+					System.out.println("Country check failed");
 					throw new VoltAbortException();
 				}
 				
@@ -100,6 +98,7 @@ public class new_transfer extends VoltProcedure {
 				double delta_time = ( current.getTime() - queryresults[0].fetchRow(0).getTimestampAsLong(0) ) / 1000*1000*60*60;
 				
 				if ( distance / delta_time > queryresults_card[0].fetchRow(0).getLong(3) ) {
+					System.out.println("Distance Check failed");
 					throw new VoltAbortException();
 				} 
 				
