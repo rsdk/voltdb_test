@@ -86,11 +86,13 @@ public class new_transfer extends VoltProcedure {
 				} 
 				
 				//specific country check
+				
+				
 			}	
 			// Insert the new Transaction
-			voltQueueSQL( insert_sql, card_num);
+			voltQueueSQL( insert_sql, current, card_num, amount, purpose , latitude, longitude, country_code );
 			
-			return voltExecuteSQL();	
+			return voltExecuteSQL();
 		}
 }
 
