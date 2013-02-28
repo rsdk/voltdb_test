@@ -69,7 +69,7 @@ public class ClientAsync_refactored {
 		myApp.createConnection("localhost");
 		
 		// *** Load the DB ***
-		int numberOfCards = 100000; // 100000 dauert ca. 15 min auf hdd und 1min 30sek auf ssd
+		int numberOfCards = 100000; // 100000 dauert ca. 38sec in voltdb. postgresql: ca. 15 min auf hdd und 1min 30sek auf ssd 
 		long cardnumber_start = 1111222233330000L;
 		
 		long startTime = System.nanoTime();
