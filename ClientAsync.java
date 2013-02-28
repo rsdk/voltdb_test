@@ -3,7 +3,65 @@ import org.voltdb.client.*;
 import java.io.*;
 import java.util.*;
 
-public class ClientAsync {
+public class ClientAsync_refactored {
+	
+	static List<String> readNamesFromFile(String dateiname) {
+		List<String> names = new ArrayList<String>();
+		String zeile = "";
+		
+		try {
+			FileReader fr = new FileReader(dateiname);
+			BufferedReader br = new BufferedReader(fr);
+
+			while( (zeile = br.readLine()) != null )
+			{
+				names.add(zeile);
+			}
+			br.close();
+			fr.close();
+		
+		} catch (IOException e) {
+			System.out.println("Dateilesefehler");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+			
+		return names;
+	}
+
+	static void writeCardsToDB(org.voltdb.client.Client myApp, int numberOfCards, long cardnumber_start)
+	{
+		long cardnumber = cardnumber_start;
+		int[] daily = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 100000, 1000000};
+		int[] monthly = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 1000000, 10000000};
+		int number_rnd10 = 0;
+		int number_rndfn = 0;
+		int number_rndln = 0;
+		List<String> firstn = readNamesFromFile("baby-names.csv");
+		List<String> lastn = readNamesFromFile("surnames.csv");
+		
+		for (int i = 0; i < numberOfCards; i++){
+			if ( i % 10000 == 0 ) {
+				System.out.println("Number of Cards: \t" + i);
+			}
+			number_rnd10 = (int) (Math.random()*10);  //random number from 0 till 9
+			number_rndfn = (int) (Math.random()*firstn.size());  //random number for namearray
+			number_rndln = (int) (Math.random()*lastn.size());   //random number for namearray
+			
+			try {
+				myApp.callProcedure("Insert_card", cardnumber++, daily[number_rnd10], monthly[number_rnd10], 1, 5, firstn.get(number_rndfn)+" "+lastn.get(number_rndln));
+			
+			} catch (Exception e) {
+				System.out.println("Error while executing Stored Procedure insert_card");
+				e.printStackTrace();
+				return;
+			}
+		}		
+	}
+	
+	
+	
+	
 	public static void main(String[] args) throws Exception {
 		// *** Instantiate Client and connect to Database ***
 		org.voltdb.client.Client myApp;
@@ -11,6 +69,16 @@ public class ClientAsync {
 		myApp.createConnection("localhost");
 		
 		// *** Load the DB ***
+		int numberOfCards = 100000; // 100000 dauert ca. 15 min auf hdd und 1min 30sek auf ssd
+		long cardnumber_start = 1111222233330000L;
+		
+		long startTime = System.nanoTime();
+		writeCardsToDB(myApp, numberOfCards, cardnumber_start);
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime);
+		System.out.println("Karten hinzufügen hat: "+ duration/1000000000.0+" Sekunden gedauert.");
+		System.out.println("Das waren: "+ (duration / (numberOfCards * 1.0))/1000000.0+" millisekunden pro Karte.");
+		
 		
 		//Load Countries from file
 		FileReader fr = new FileReader("country_names_and_code_elements_txt.txt");
@@ -29,70 +97,9 @@ public class ClientAsync {
 		fr.close();
 		//Load Card with random cards
 
-		//load String Array with names from file
-		FileReader frfn = new FileReader("baby-names.csv");
-		BufferedReader brfn = new BufferedReader(frfn);
-			
-		zeile = "";
-		List<String> firstnames = new ArrayList<String>();
-
-		while( (zeile = brfn.readLine()) != null )
-		{
-			firstnames.add(zeile);
-		}
-		brfn.close();
-		frfn.close();
-		//load String Array with names from file
-		FileReader frln = new FileReader("surnames.csv");
-		BufferedReader brln = new BufferedReader(frln);
-			
-		zeile = "";
-		List<String> lastnames = new ArrayList<String>();
-
-		while( (zeile = brln.readLine()) != null )
-		{
-			lastnames.add(zeile);
-		}
-		brln.close();
-		frln.close();
-		
-		
-		int numberOfCards = 1000000; // 10 Mio dauert ca. eine Stunde
-		long cardnumber_start = 1111222233330000L;
-		long cardnumber = cardnumber_start;
-		int[] daily = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 100000, 1000000};
-		int[] monthly = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 1000000, 10000000};
-		int number_rnd10 = 0;
-		int number_rndfn = 0;
-		int number_rndln = 0;
-		
-		for (int i = 0; i < numberOfCards; i++){
-			if ( i % 100000 == 0 ) {
-				System.out.println("Number of Cards: \t" + i);
-			}
-			number_rnd10 = (int) (Math.random()*10);  //random number from 0 till 9
-			number_rndfn = (int) (Math.random()*firstnames.size());  //random number for namearray
-			number_rndln = (int) (Math.random()*lastnames.size());   //random number for namearray
-			myApp.callProcedure("Insert_card", cardnumber++, daily[number_rnd10], monthly[number_rnd10], 1, 5, firstnames.get(number_rndfn)+" "+lastnames.get(number_rndln));
-		}
 		
 		
 		System.out.printf("Datenbank vorbereitet \n\n");
-		
-		// Transactions
-		/*
-		 * CREATE TABLE transfer (
-			transfer_num BIGINT NOT NULL,
-			transfer_time TIMESTAMP,
-			card_num BIGINT NOT NULL,
-			amount DECIMAL NOT NULL,
-			purpose VARCHAR(64),
-			latitude FLOAT,
-			longitude FLOAT,
-			country_code VARCHAR(2),
-			PRIMARY KEY (transfer_num)
-			);
-		 */
 		 
 		//neue Daten
 		long number_rndcard = 0;
@@ -103,19 +110,10 @@ public class ClientAsync {
 		amount = (long) (Math.random() * 1000 + 40);		
 		
 		
-		number_rndcard = (long) (Math.random() * numberOfCards + cardnumber); //zufallszahl für card
+		number_rndcard = (long) (Math.random() * numberOfCards + cardnumber_start); //zufallszahl für card
 		
 		// INSERT
 		
-		//final ClientResponse response = myApp.callProcedure("new_transfer", 
-		//													cardnumber_start+1,  /*card_number*/
-		//													10,      /*amount*/
-		//													48.2,      /*/lat*/
-		//													13.0,      /*long*/
-		//													"DE",      /*country_code*/
-		//													"TEST"     /*purpose*/
-		//	
-		//												);
 		long rnd_cardnumber = 0L;
 		int number_transactions = 2000000;										
 		for (int k = 0; k < number_transactions; k++) {
