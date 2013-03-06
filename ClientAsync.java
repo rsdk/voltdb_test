@@ -3,7 +3,7 @@ import org.voltdb.client.*;
 import java.io.*;
 import java.util.*;
 
-public class ClientAsync_refactored {
+public class ClientAsync {
 	
 	static List<String> readNamesFromFile(String dateiname) {
 		List<String> names = new ArrayList<String>();
@@ -69,7 +69,7 @@ public class ClientAsync_refactored {
 		myApp.createConnection("localhost");
 		
 		// *** Load the DB ***
-		int numberOfCards = 100000; // 100000 dauert ca. 38sec in voltdb. postgresql: ca. 15 min auf hdd und 1min 30sek auf ssd 
+		int numberOfCards = 1000000; // 100000 dauert ca. 38sec in voltdb. postgresql: ca. 15 min auf hdd und 1min 30sek auf ssd 
 		long cardnumber_start = 1111222233330000L;
 		
 		long startTime = System.nanoTime();
@@ -107,7 +107,7 @@ public class ClientAsync_refactored {
 		String country_code = "DE";
 		double lat_neu = 48.4;
 		double long_neu = 13.9;
-		amount = (long) (Math.random() * 1000 + 40);		
+		//amount = (long) (Math.random() * 1000 + 40);		
 		
 		
 		number_rndcard = (long) (Math.random() * numberOfCards + cardnumber_start); //zufallszahl für card
@@ -115,9 +115,9 @@ public class ClientAsync_refactored {
 		// INSERT
 		
 		long rnd_cardnumber = 0L;
-		int number_transactions = 2000000;										
+		int number_transactions = 1000000;										
 		for (int k = 0; k < number_transactions; k++) {
-			amount = (int) (Math.random()*1000);
+			amount = (int) (Math.random()*10);
 			rnd_cardnumber = cardnumber_start+((int) (Math.random()*numberOfCards));
 			if ( k % 100000 == 0 ) {
 				System.out.println("Transfer-number: " + k);

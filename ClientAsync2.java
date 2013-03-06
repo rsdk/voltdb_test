@@ -21,7 +21,10 @@ public class ClientAsync2 {
 		amount = (long) (Math.random() * 1000 + 40);
 		
 		long rnd_cardnumber = 0L;
-		int number_transactions = 2000000;										
+		int number_transactions = 1000000;	
+		
+		long startTime = System.nanoTime();
+											
 		for (int k = 0; k < number_transactions; k++) {
 			amount = (int) (Math.random()*1000);
 			rnd_cardnumber = cardnumber_start+((int) (Math.random()*numberOfCards));
@@ -44,5 +47,10 @@ public class ClientAsync2 {
 				//System.exit(-1);
 			}
 		}
+		
+		long endTime = System.nanoTime();
+		double duration = (endTime - startTime)/1000000000.0; //in Sekunden
+		System.out.println("Transfers haben: "+ duration+" Sekunden gedauert.");
+		System.out.println("Das sind: "+ number_transactions/duration +" Transfers pro Sekunde.");
 	}
 }
