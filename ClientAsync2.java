@@ -10,7 +10,7 @@ public class ClientAsync2 {
 		myApp = ClientFactory.createClient();
 		myApp.createConnection("localhost");
 		
-		int numberOfCards = 1000000; // 10 Mio dauert ca. eine Stunde
+		int numberOfCards = 100000; // 10 Mio dauert ca. eine Stunde
 		long cardnumber_start = 1111222233330000L;
 
 		long number_rndcard = 0;
